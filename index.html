@@ -1,0 +1,782 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Demo de agenda digital</title>
+<meta name="description" content="Demo de agenda digital de citas para negocios: veterinaria, tatuajes, casas en renta, barbería, dentista, fisioterapia y uñas.">
+<meta name="theme-color" content="#14120e">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Agenda Demo">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Allura&family=Montserrat:wght@400;500;600&family=Poppins:ital,wght@0,600;1,800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Montserrat,system-ui,sans-serif;font-size:15px;line-height:1.4;transition:background .3s}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none;padding:0}
+input,textarea{font:inherit;color:var(--ink)}
+svg{display:block}
+.wrap{max-width:560px;margin:0 auto;padding-bottom:110px}
+/* barra demo */
+.demobar{position:sticky;top:0;z-index:30;background:#14120e;color:#f6f1e6;display:flex;align-items:center;gap:8px;padding:7px 12px;font-size:12px}
+.demobar .lbl{font-weight:600;letter-spacing:.14em;font-size:10.5px;background:#e8c66e;color:#14120e;border-radius:5px;padding:2px 6px}
+.demobar .sp{flex:1;opacity:.75;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.demobar .vista{border:1px solid #5a5244;border-radius:99px;padding:5px 10px;font-weight:600;white-space:nowrap;display:inline-flex;align-items:center;gap:5px}
+.demobar .vista svg{width:14px;height:14px;color:#e8c66e}
+@media (max-width:420px){.demobar .sp{visibility:hidden}}
+/* encabezado */
+.hdr{background:var(--hdr);color:var(--hdrInk);min-height:66px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 12px;text-align:center}
+.hdr .l1{display:flex;align-items:center;gap:10px}
+.hdr svg{width:26px;height:26px}
+.hdr .nm{font:600 20px Poppins,sans-serif}
+.hdr .tg{font-size:9px;letter-spacing:.22em;opacity:.75;margin-top:2px}
+.hero{position:relative;padding:54px 18px 16px;overflow:hidden}
+.pat{position:absolute;inset:0;color:var(--pri);pointer-events:none}
+.pat svg{position:absolute}
+.giro{position:absolute;top:12px;right:12px;z-index:2;display:flex;align-items:center;gap:6px;background:var(--surf);border:1.5px dashed var(--pri);color:var(--pri);font:600 12.5px Montserrat,sans-serif;padding:7px 12px;border-radius:99px;box-shadow:0 4px 14px rgba(0,0,0,.12)}
+.giro svg{width:15px;height:15px}
+.h1{position:relative}
+.h1 .a{font-family:Allura,cursive;font-size:48px;line-height:.95;display:block}
+.h1 .b{font:800 italic 38px/1.05 Poppins,sans-serif;color:var(--pri);display:block}
+.hero p{position:relative;font-size:14px;color:var(--muted);margin:10px 0 0}
+/* tarjetas y pasos */
+.card{background:var(--surf);border:1px solid var(--line);border-radius:16px;margin:0 14px 12px;padding:14px}
+.step.locked{opacity:.45;pointer-events:none}
+.stp{display:flex;align-items:center;gap:9px;font:600 17px Poppins,sans-serif;margin-bottom:10px}
+.stp i{font-style:normal;width:26px;height:26px;border-radius:50%;background:var(--ink);color:var(--bg);display:grid;place-items:center;font-size:13px;flex:none}
+.stp small{margin-left:auto;font:500 12px Montserrat,sans-serif;color:var(--muted)}
+.chips{display:flex;gap:7px;flex-wrap:wrap}
+.chips.scroll{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;margin:0 -2px;scrollbar-width:none}
+.chips.scroll::-webkit-scrollbar{display:none}
+.chip{border:1.5px solid var(--line);background:var(--surf);border-radius:99px;padding:7px 13px;font-size:13px;font-weight:500;white-space:nowrap}
+.chip[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.oscuro .chip[aria-pressed=true]{background:var(--pri);color:#140c08;border-color:var(--pri)}
+.catT{font-size:11px;letter-spacing:.16em;color:var(--muted);font-weight:600;margin:14px 0 2px;text-transform:uppercase}
+.sv{display:flex;align-items:center;gap:11px;padding:11px 0;border-top:1px solid var(--line)}
+.catT+.sv{border-top:0}
+.ill{width:48px;height:48px;border-radius:13px;display:grid;place-items:center;flex:none;background:color-mix(in srgb,var(--pri) 14%,var(--surf));color:var(--pri)}
+.ill svg{width:27px;height:27px}
+.sv .t{flex:1;min-width:0}.sv b{display:block;font-weight:600;font-size:14.5px}
+.sv .d{font-size:12.5px;color:var(--muted)}
+.sv .m{font-size:12.5px;color:var(--muted);margin-top:1px}.sv .m b{display:inline;font-size:12.5px;color:var(--ink)}
+.btn{background:var(--ink);color:var(--bg);font:600 13px Montserrat,sans-serif;border-radius:99px;padding:8px 14px;white-space:nowrap}
+.btn.o{background:transparent;color:var(--ink);border:1.5px solid var(--ink)}
+.btn.p{background:var(--pri);color:#fff}
+.btn.ok{background:#1b7446;color:#fff}.btn.bad{background:#b3261e;color:#fff}
+.btn.sm{padding:6px 11px;font-size:12px}
+.oscuro .btn{background:var(--pri);color:#140c08}
+.oscuro .btn.o{background:transparent;color:var(--ink);border-color:var(--ink)}
+.btn[aria-pressed=true]{background:var(--ink);color:var(--bg)}
+.oscuro .btn[aria-pressed=true]{background:var(--pri);color:#140c08}
+.btn:disabled{opacity:.4}
+/* quién */
+.people{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}
+.person{border:1.5px solid var(--line);border-radius:14px;padding:10px;text-align:left;background:var(--surf)}
+.person[aria-pressed=true]{border-color:var(--pri);box-shadow:0 0 0 2px color-mix(in srgb,var(--pri) 30%,transparent)}
+.person .av{width:34px;height:34px;border-radius:50%;background:var(--pri);color:#fff;display:grid;place-items:center;font-weight:600;margin-bottom:6px}
+.person b{display:block;font-size:14px;font-weight:600}.person small{font-size:11.5px;color:var(--muted)}
+/* días y horas */
+.days{display:flex;gap:7px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none}
+.days::-webkit-scrollbar{display:none}
+.day{flex:none;width:62px;border:1.5px solid var(--line);border-radius:12px;padding:7px 0;text-align:center;background:var(--surf)}
+.day small{display:block;font-size:11.5px;color:var(--muted)}.day b{display:block;font:600 21px Poppins,sans-serif}
+.day[aria-pressed=true]{background:color-mix(in srgb,var(--pri2) 28%,var(--surf));border-color:var(--pri2)}
+.day:disabled{opacity:.4}
+.slT{font-size:11px;letter-spacing:.16em;color:var(--muted);font-weight:600;margin:12px 0 6px}
+.slots{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.slot{border:1.5px solid var(--line);border-radius:10px;padding:9px 0;font-size:13.5px;font-weight:500;background:var(--surf)}
+.slot:disabled{color:var(--muted);text-decoration:line-through;background:repeating-linear-gradient(135deg,transparent 0 5px,color-mix(in srgb,var(--ink) 6%,transparent) 5px 7px);opacity:.7}
+.slot[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.oscuro .slot[aria-pressed=true]{background:var(--pri);color:#140c08;border-color:var(--pri)}
+.empty{font-size:13.5px;color:var(--muted);padding:10px 0}
+/* formulario */
+.fld{margin-bottom:12px}.fld label{display:block;font-size:13px;font-weight:600;margin-bottom:5px}
+.fld input,.fld textarea{width:100%;border:1.5px solid var(--line);background:var(--bg);border-radius:11px;padding:11px 12px;font-size:15px;outline:none}
+.fld input:focus,.fld textarea:focus{border-color:var(--pri)}
+.fld textarea{min-height:66px;resize:vertical}
+.err{color:#c0392b;font-size:12.5px;margin-top:4px}
+.note{display:flex;gap:9px;align-items:flex-start;background:color-mix(in srgb,var(--pri2) 20%,var(--surf));border:1px solid var(--pri2);border-radius:12px;padding:10px 12px;font-size:13px;line-height:1.45}
+.note svg{width:18px;height:18px;flex:none;color:var(--pri);margin-top:1px}
+.cta{display:block;width:calc(100% - 28px);margin:6px 14px 0;background:var(--ink);color:var(--bg);text-align:center;font:600 15px Montserrat,sans-serif;padding:14px;border-radius:99px}
+.oscuro .cta{background:var(--pri);color:#140c08}
+.cta:disabled{opacity:.4}
+.kv{display:flex;justify-content:space-between;gap:10px;font-size:13.5px;padding:5px 0}.kv span{color:var(--muted)}.kv b{font-weight:600;text-align:right}
+.tot{display:flex;justify-content:space-between;font:600 16px Poppins,sans-serif;border-top:1px solid var(--line);padding-top:9px;margin-top:5px}
+/* barra inferior */
+.foot{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--ink);color:var(--bg)}
+.foot .in{max-width:560px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 16px calc(12px + env(safe-area-inset-bottom))}
+.foot b{font-weight:600;font-size:14px}.foot small{display:block;opacity:.75;font-size:12px}
+.foot .btn{background:var(--pri2);color:#14120e}
+/* ticket */
+.ticket{border-top:5px solid var(--pri2)}
+.ticket .h{font-size:11px;letter-spacing:.14em;color:var(--muted);font-weight:600}
+.ticket .te{font-family:Allura,cursive;font-size:40px;color:var(--pri);line-height:1}
+.ticket .nm{font:800 italic 30px Poppins,sans-serif;line-height:1.05}
+.ticket .box{background:color-mix(in srgb,var(--pri2) 14%,var(--surf));border-radius:12px;padding:10px 12px;margin:12px 0}
+.ticket .row{display:flex;gap:10px;font-size:13.5px;padding:3px 0}.ticket .row .hr{font-weight:600;width:74px;flex:none}
+.wa{display:flex;align-items:center;justify-content:center;gap:8px;background:#1b7446;color:#fff;font:600 14.5px Montserrat,sans-serif;padding:13px;border-radius:99px;text-decoration:none;margin-top:8px}
+.wa svg{width:19px;height:19px}
+/* interés */
+.mio{margin:18px 14px 0;border-radius:16px;padding:16px;background:#14120e;color:#f6f1e6;display:flex;gap:12px;align-items:center}
+.mio img{width:46px;height:46px;border-radius:12px;flex:none}
+.mio b{display:block;font:600 15px Poppins,sans-serif}.mio small{font-size:12.5px;opacity:.8;display:block;margin-top:2px}
+.mio a{margin-left:auto;background:#e8c66e;color:#14120e;font-weight:600;font-size:13px;border-radius:99px;padding:9px 13px;text-decoration:none;white-space:nowrap}
+.firma{text-align:center;font-size:11.5px;color:var(--muted);margin:16px 0 0;letter-spacing:.06em}
+/* hoja cambiar giro */
+.over{position:fixed;inset:0;background:rgba(10,8,6,.5);z-index:40;animation:fi .2s}
+.bs{position:fixed;left:0;right:0;bottom:0;z-index:41;background:#fffdf8;color:#14120e;border-radius:22px 22px 0 0;padding:10px 16px calc(16px + env(safe-area-inset-bottom));max-height:88vh;overflow:auto;animation:su .25s;max-width:560px;margin:0 auto}
+@keyframes fi{from{opacity:0}}@keyframes su{from{transform:translateY(40px);opacity:0}}
+.bs .x{position:absolute;right:12px;top:12px;width:34px;height:34px;border-radius:50%;background:#f0ebe1;font-size:15px}
+.bs .gr{width:42px;height:5px;border-radius:9px;background:#d9d2c3;margin:0 auto 12px}
+.bs h3{font:600 18px Poppins,sans-serif;margin:0 0 2px}.bs p{font-size:12.5px;color:#6b6457;margin:0 0 12px}
+.opt{display:flex;align-items:center;gap:12px;width:100%;padding:9px 10px;border-radius:13px;border:1.5px solid #ece4d4;margin-bottom:7px;text-align:left;background:#fff}
+.opt .sw{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;flex:none}.opt .sw svg{width:23px;height:23px}
+.opt b{font-weight:600;font-size:14px;display:block}.opt small{font-size:12px;color:#6b6457}
+.opt[aria-pressed=true]{border-color:#14120e;background:#f6f1e6}.opt .ck{margin-left:auto;font-weight:600}
+.bs .acc{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.bs .acc button{flex:1;border:1.5px solid #d9d2c3;border-radius:99px;padding:10px;font-weight:600;font-size:13px;background:#fff;min-width:140px}
+.bs .ios{font-size:13px;background:#f6f1e6;border-radius:12px;padding:10px 12px;margin-top:10px;line-height:1.5}
+/* toast */
+.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#14120e;color:#f7e8a0;padding:11px 16px;border-radius:12px;font-size:13.5px;z-index:60;box-shadow:0 8px 24px rgba(0,0,0,.25);max-width:90vw;text-align:center}
+/* casas */
+.casa{border:1.5px solid var(--line);border-radius:16px;overflow:hidden;margin-bottom:12px;background:var(--surf)}
+.casa[aria-pressed=true]{border-color:var(--pri);box-shadow:0 0 0 2px color-mix(in srgb,var(--pri) 30%,transparent)}
+.casa .ph{height:128px;position:relative;overflow:hidden;color:#fff}
+.casa .ph .big{position:absolute;left:50%;top:50%;width:70px;height:70px;transform:translate(-50%,-56%);color:rgba(255,255,255,.95)}
+.casa .ph .pat svg{color:#fff}
+.casa .bd{padding:12px}
+.casa .bd b{font:600 18px Poppins,sans-serif}.casa .bd .d{font-size:12.5px;color:var(--muted);margin:2px 0 8px}
+.casa .am{display:flex;gap:6px;flex-wrap:wrap}.casa .am span{font-size:11.5px;border:1px solid var(--line);border-radius:99px;padding:3px 9px}
+.casa .pr{display:flex;align-items:center;justify-content:space-between;margin-top:10px}
+.casa .pr b{font:600 17px Poppins,sans-serif}.casa .pr small{font-size:12px;color:var(--muted)}
+.mes{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.mes b{font:600 16px Poppins,sans-serif;text-transform:capitalize}
+.mes button{width:34px;height:34px;border-radius:50%;border:1.5px solid var(--line);font-size:18px}
+.mes button:disabled{opacity:.3}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;text-align:center}
+.cal .dw{font-size:10.5px;color:var(--muted);font-weight:600;padding:3px 0}
+.cal button{height:42px;border-radius:9px;font-weight:500;font-size:14px;position:relative}
+.cal button:disabled{color:var(--muted);opacity:.55}
+.cal .oc{text-decoration:line-through;background:repeating-linear-gradient(135deg,transparent 0 4px,color-mix(in srgb,var(--ink) 7%,transparent) 4px 6px)}
+.cal .in,.cal .out{background:var(--pri);color:#fff;font-weight:600;opacity:1}
+.cal .in{border-radius:11px 3px 3px 11px}.cal .out{border-radius:3px 11px 11px 3px}
+.cal .in.solo{border-radius:11px}
+.cal .mid{background:color-mix(in srgb,var(--pri) 18%,var(--surf));border-radius:3px}
+.cal small{position:absolute;bottom:2px;left:0;right:0;font-size:8.5px;font-weight:600}
+.leg{display:flex;gap:12px;font-size:11.5px;color:var(--muted);margin-top:9px;flex-wrap:wrap}
+.leg span{display:inline-flex;align-items:center;gap:5px}.leg i{width:12px;height:12px;border-radius:3px;display:inline-block}
+/* panel */
+.ptabs{display:flex;gap:4px;padding:10px 14px 0;border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:none;margin-bottom:12px}
+.ptabs button{padding:8px 10px 10px;font-weight:500;font-size:14px;color:var(--muted);border-bottom:2.5px solid transparent;white-space:nowrap}
+.ptabs button[aria-pressed=true]{color:var(--ink);font-weight:600;border-color:var(--pri2)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 14px 12px}
+.stat{background:var(--surf);border:1px solid var(--line);border-radius:14px;padding:10px;text-align:center}
+.stat b{display:block;font:600 22px Poppins,sans-serif}.stat small{font-size:11.5px;color:var(--muted)}
+.dnav{display:flex;align-items:center;justify-content:space-between;margin:0 14px 10px}
+.dnav b{font:600 15px Poppins,sans-serif;text-align:center}
+.dnav button{width:36px;height:36px;border-radius:50%;border:1.5px solid var(--line);font-size:18px;background:var(--surf)}
+.cita{display:flex;gap:12px;padding:12px 0;border-top:1px solid var(--line)}
+.cita:first-child{border-top:0}
+.cita .hr{width:68px;flex:none;font:600 14px Poppins,sans-serif;white-space:nowrap}.cita .hr small{display:block;font:500 11px Montserrat,sans-serif;color:var(--muted)}
+.cita .t{flex:1;min-width:0}.cita .t b{font-weight:600}.cita .t .s{font-size:12.5px;color:var(--muted)}
+.cita .acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.est{display:inline-block;font-size:11px;font-weight:600;border-radius:99px;padding:2px 8px;margin-left:4px;vertical-align:1px}
+.est.pendiente{background:color-mix(in srgb,var(--pri2) 30%,var(--surf))}
+.est.llego{background:#d9f0e2;color:#1b7446}.est.no{background:#fbe0dd;color:#b3261e}.est.cancelada{background:#e6e3dc;color:#6b6457}
+.cita.cancelada .t,.cita.cancelada .hr{opacity:.5}
+.wk{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+.wk:first-child{border-top:0}.wk .dd{width:96px;font-weight:600}
+.wk .bar{flex:1;height:10px;border-radius:9px;background:color-mix(in srgb,var(--pri) 12%,var(--surf));overflow:hidden}
+.wk .bar i{display:block;height:100%;background:var(--pri);border-radius:9px}
+.wk .n{width:90px;text-align:right;font-size:13px;color:var(--muted)}
+.gantt{overflow-x:auto;scrollbar-width:thin}
+.gantt .gh,.gantt .gr2{display:flex}
+.gantt .gh div{width:34px;flex:none;text-align:center;font-size:10px;color:var(--muted)}
+.gantt .gh b{display:block;font-size:12.5px;color:var(--ink)}
+.gantt .gh .hoy b{color:var(--pri)}
+.gantt .gn{font-size:12.5px;font-weight:600;margin:10px 0 4px}
+.gantt .gr2{position:relative;height:30px;background:repeating-linear-gradient(90deg,transparent 0 33px,var(--line) 33px 34px);border-radius:6px}
+.gantt .bk{position:absolute;top:3px;height:24px;border-radius:7px;background:var(--pri);color:#fff;font-size:10.5px;font-weight:600;padding:5px 7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gantt .bk.llego{background:#1b7446}
+.foot.panel{display:none}
+@media (min-width:700px){.wrap{padding-top:10px}.hdr{border-radius:0 0 18px 18px}}
+.oscuro .btn.ok{background:#1b7446;color:#fff;border-color:#1b7446}.oscuro .btn.bad{background:#b3261e;color:#fff;border-color:#b3261e}
+.oscuro .foot{background:#f6ebe4;color:#14120e}
+
+</style>
+</head>
+<body>
+<div id="app"></div>
+<noscript>Activa JavaScript para ver la demo.</noscript>
+<script>
+/* ====== DATOS DE CADA GIRO (todo inventado, precios aproximados) ====== */
+const SVG={
+ paw:'<g fill="currentColor"><ellipse cx="12" cy="16" rx="5" ry="4.2"/><circle cx="6" cy="10" r="2.2"/><circle cx="10" cy="6.5" r="2.2"/><circle cx="14" cy="6.5" r="2.2"/><circle cx="18" cy="10" r="2.2"/></g>',
+ cat:'<path fill="currentColor" d="M5 4l3.5 4.2A8 8 0 0 1 12 7.5a8 8 0 0 1 3.5.7L19 4l.6 7A7.5 7.5 0 1 1 4.4 11z"/>',
+ dog:'<path fill="currentColor" d="M7 6c1.5-1.2 3.2-1.8 5-1.8s3.5.6 5 1.8l3 1.5-1 6-2-1.5V15a5 5 0 0 1-10 0v-3l-2 1.5-1-6z"/>',
+ bone:'<path fill="currentColor" d="M6.5 4a2.5 2.5 0 0 1 2.4 3.2l6 6A2.5 2.5 0 1 1 18 16.4a2.5 2.5 0 1 1-2.4 3.2 2.5 2.5 0 0 1-.7-2.4l-6-6a2.5 2.5 0 1 1-3.2-2.4A2.5 2.5 0 0 1 6.5 4z"/>',
+ flame:'<path fill="currentColor" d="M12 1.5c1.2 4.2 6.5 6.4 6.5 12.4a6.5 6.5 0 0 1-13 0c0-3.2 1.8-5.2 3-7.2.2 2.2 1.2 3.3 2.3 3.6-1-3.4.1-6.6 1.2-8.8z"/>',
+ star:'<path fill="currentColor" d="M12 2l1.8 6.2L20 10l-6.2 1.8L12 18l-1.8-6.2L4 10l6.2-1.8z"/>',
+ skull:'<path fill="currentColor" d="M12 2a8 8 0 0 0-8 8c0 2.8 1.4 4.6 3 5.6V19a1 1 0 0 0 1 1h1.5v-2h1v2h3v-2h1v2H16a1 1 0 0 0 1-1v-3.4c1.6-1 3-2.8 3-5.6a8 8 0 0 0-8-8zM8.5 9.5a2 2 0 1 1 0 4 2 2 0 0 1 0-4zm7 0a2 2 0 1 1 0 4 2 2 0 0 1 0-4z"/>',
+ wave:'<path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" d="M2 9c2.5-2.5 5-2.5 7.5 0s5 2.5 7.5 0 5-2.5 7.5 0M2 15c2.5-2.5 5-2.5 7.5 0s5 2.5 7.5 0 5-2.5 7.5 0"/>',
+ palm:'<path fill="currentColor" d="M12 9c-1-3-4-4-7-3 2 0 4 1 5 3-3-1-6 0-7 2 2-1 5-1 7 0-1 2-1 6 0 11h2c-1-5-1-9 0-11 2-1 5-1 7 0-1-2-4-3-7-2 1-2 3-3 5-3-3-1-6 0-7 3z"/>',
+ sun:'<g fill="currentColor"><circle cx="12" cy="12" r="4.5"/><path d="M11 1h2v3h-2zM11 20h2v3h-2zM1 11h3v2H1zM20 11h3v2h-3zM4.2 5.6l1.4-1.4 2.1 2.1-1.4 1.4zM16.3 17.7l1.4-1.4 2.1 2.1-1.4 1.4zM4.2 18.4l2.1-2.1 1.4 1.4-2.1 2.1zM16.3 6.3l2.1-2.1 1.4 1.4-2.1 2.1z"/></g>',
+ anchor:'<path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M12 6v15M8 9h8M4 13c0 4 3.6 8 8 8s8-4 8-8"/><circle cx="12" cy="4" r="2" fill="none" stroke="currentColor" stroke-width="1.8"/>',
+ tooth:'<path fill="currentColor" d="M7 3c2 0 3 1 5 1s3-1 5-1c3 0 4 2.5 4 5 0 3-1.5 5-2 8-.4 2.5-1 5-2.5 5S15 18 14 16c-.5-1-1-1.5-2-1.5s-1.5.5-2 1.5c-1 2-1 5-2.5 5S5.4 18.5 5 16c-.5-3-2-5-2-8 0-2.5 1-5 4-5z"/>',
+ spark:'<path fill="currentColor" d="M12 3l1.2 4.8L18 9l-4.8 1.2L12 15l-1.2-4.8L6 9l4.8-1.2zM19 15l.6 2.4L22 18l-2.4.6L19 21l-.6-2.4L16 18l2.4-.6z"/>',
+ move:'<path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M3 12c3-6 6-6 9 0s6 6 9 0"/><circle cx="12" cy="4" r="2" fill="currentColor"/>',
+ bolt:'<path fill="currentColor" d="M13 2L4 14h6l-1 8 9-12h-6z"/>',
+ tape:'<path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M5 19L19 5M8 20l12-12M4 16L16 4"/>',
+ petal:'<path fill="currentColor" d="M12 2c3 3 4 6 0 10C8 8 9 5 12 2zM12 22c-3-3-4-6 0-10 4 4 3 7 0 10zM2 12c3-3 6-4 10 0-4 4-7 3-10 0zM22 12c-3 3-6 4-10 0 4-4 7-3 10 0z"/>',
+ polish:'<path fill="currentColor" d="M10 2h4v5h-4zM8 8h8l1 3v9a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2v-9z"/>',
+ eye:'<path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M2 12s4-6 10-6 10 6 10 6-4 6-10 6S2 12 2 12zM5 7L3.5 5M9 5.3L8.5 3M15 5.3l.5-2.3M19 7l1.5-2"/><circle cx="12" cy="12" r="2.5" fill="currentColor"/>',
+ foot:'<path fill="currentColor" d="M9 22c-2.5 0-4-2-4-4.5C5 14 7 12 7 9s1.5-4 3.5-4S14 7 13 10c-.7 2 .5 3 .5 5.5S12 22 9 22z"/><circle cx="15" cy="4" r="1.6" fill="currentColor"/><circle cx="17.6" cy="6" r="1.3" fill="currentColor"/><circle cx="19" cy="8.8" r="1.1" fill="currentColor"/>',
+ scissors:'<g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="6" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M8.5 7.5L20 18M8.5 16.5L20 6"/></g>',
+ machine:'<g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="11" y="2.5" width="7" height="11" rx="2" transform="rotate(40 14.5 8)"/><path d="M9.5 13.5L3.5 20.5M7.2 11.5l4.2 4"/><circle cx="17.5" cy="5" r="1" fill="currentColor"/></g>',
+ ring:'<circle cx="12" cy="13" r="6" fill="none" stroke="currentColor" stroke-width="2.2"/><circle cx="12" cy="6" r="2.4" fill="currentColor"/>',
+ syringe:'<path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M18 2l4 4M20 4l-9 9M15 5l4 4M13 7l-8 8-2 6 6-2 8-8M7 13l4 4"/>',
+ house:'<path fill="currentColor" d="M3 11l9-7 9 7v10h-6v-6H9v6H3z"/>',
+ bath:'<path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M3 12h18v3a5 5 0 0 1-5 5H8a5 5 0 0 1-5-5zM6 12V5a2 2 0 0 1 4 0"/>',
+ stetho:'<path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M6 3v6a4 4 0 0 0 8 0V3M10 13v3a5 5 0 0 0 10 0v-2"/><circle cx="20" cy="12" r="2" fill="currentColor"/>',
+ hand:'<path fill="currentColor" d="M8 21c-2-1-4-4-4-7V9a1.5 1.5 0 0 1 3 0v3h1V4.5a1.5 1.5 0 0 1 3 0V11h1V3.5a1.5 1.5 0 0 1 3 0V11h1V5.5a1.5 1.5 0 0 1 3 0V15c0 3-2 6-5 6z"/>',
+ razor:'<g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 15L15 3l3 3L6 18z"/><path d="M6 18l3 3h5l-2-5"/></g>',
+ beard:'<path fill="currentColor" d="M5 6c0 7 2.5 13 7 13s7-6 7-13c-1.5 2-3 3-7 3S6.5 8 5 6zm4 8c1.2.8 4.8.8 6 0-.6 1.4-1.8 2-3 2s-2.4-.6-3-2z"/>',
+ brace:'<g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 12h18"/><rect x="4.5" y="9" width="4" height="6" rx="1"/><rect x="10" y="9" width="4" height="6" rx="1"/><rect x="15.5" y="9" width="4" height="6" rx="1"/></g>',
+ sofa:'<path fill="currentColor" d="M4 10a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v1a2 2 0 0 1 2 2v5h-2v2h-2v-2H6v2H4v-2H2v-5a2 2 0 0 1 2-2z"/>',
+ pool:'<path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M2 18c2.5-2 5-2 7.5 0s5 2 7.5 0 3.5-1.5 5 0M8 15V5a2 2 0 0 1 4 0M16 15V5a2 2 0 0 0-4 0M8 9h8"/>',
+};
+
+const NOMBRES=['Mariana López','Carlos Méndez','Sofía García','Luis Martínez','Andrea Pérez','Diego Ramírez','Valeria Cruz','Jorge Silva','Fernanda Ruiz','Ricardo Torres','Paola Navarro','Iván Herrera','Karen Vázquez','Daniel Flores','Alejandra Ríos','Héctor Gómez'];
+
+/* precio: número aproximado; desde:true muestra "desde $X"; 0 = gratis */
+const GIROS={
+ vet:{
+  nombre:'Huellitas Vet',giro:'Veterinaria',ico:'paw',tag:'CLÍNICA VETERINARIA',folio:'V',
+  tema:{bg:'#fff6ec',surf:'#fffdf9',ink:'#2b1d12',muted:'#7a6656',pri:'#e07a2f',pri2:'#1f8a6b',hdr:'#2b1d12',hdrInk:'#ffe2c4',line:'#f0dfcc'},
+  pat:['paw','cat','dog','bone'],patOp:.22,
+  hero:['Agenda la cita','de tu peludito'],sub:'Elige el servicio y te mostramos solo los horarios libres.',
+  horario:{1:[540,1140],2:[540,1140],3:[540,1140],4:[540,1140],5:[540,1140],6:[600,840]},
+  personal:[{id:'paola',nombre:'Dra. Paola',puesto:'Médica veterinaria',cats:['consultas','vacunas']},{id:'andres',nombre:'Dr. Andrés',puesto:'Médico veterinario',cats:['consultas','vacunas']},{id:'mario',nombre:'Mario',puesto:'Estética canina',cats:['estetica']}],
+  cats:[['consultas','Consultas'],['vacunas','Vacunas'],['estetica','Estética']],
+  svc:[['consultas','stetho','Consulta general','Revisión completa de tu mascota',30,350],
+       ['consultas','stetho','Consulta de urgencia','Atención el mismo día',30,500],
+       ['consultas','paw','Desparasitación','Interna y externa',15,150,1],
+       ['vacunas','syringe','Vacuna múltiple','Cachorros y adultos',20,350],
+       ['vacunas','syringe','Vacuna antirrábica','',15,200],
+       ['estetica','bath','Baño','Shampoo, secado y perfume',60,250,1],
+       ['estetica','scissors','Baño y corte','Corte de raza o a tu gusto',90,350,1],
+       ['estetica','paw','Corte de uñas','',15,80]],
+  extra:[{id:'mascota',label:'Nombre de tu mascota',tipo:'texto',ph:'Ej. Firulais',req:1},
+         {id:'especie',label:'Especie',tipo:'chips',opts:['🐶 Perro','🐱 Gato','Otro']},
+         {id:'tamano',label:'Tamaño',tipo:'chips',opts:['Chico','Mediano','Grande']}],
+  ejemploExtra:i=>({mascota:['Firulais','Luna','Max','Michi','Rocky','Kira','Canela','Simba'][i%8],especie:['🐶 Perro','🐱 Gato'][i%2],tamano:['Chico','Mediano','Grande'][i%3]}),
+  resumenExtra:e=>[e.mascota,e.especie,e.tamano].filter(Boolean).join(' · '),
+ },
+ tattoo:{
+  nombre:'Tinta Volcán',giro:'Tatuajes y piercings',ico:'flame',tag:'TATTOO & PIERCING',folio:'T',oscuro:1,
+  tema:{bg:'#0d0b0b',surf:'#181312',ink:'#f6ebe4',muted:'#b19c90',pri:'#ff5a1f',pri2:'#ffb347',hdr:'#000000',hdrInk:'#ff7a3d',line:'#2e2421'},
+  pat:['flame','star','skull','flame'],patOp:.2,
+  hero:['Aparta','tu sesión'],sub:'Cotiza tu diseño o aparta tu piercing. Solo ves los horarios libres.',
+  horario:{1:[720,1260],2:[720,1260],3:[720,1260],4:[720,1260],5:[720,1260],6:[720,1260]},
+  personal:[{id:'leo',nombre:'Leo',puesto:'Tatuador',cats:['tatuajes','otros']},{id:'vale',nombre:'Valeria',puesto:'Tatuadora y perforadora',cats:['tatuajes','piercings','otros']}],
+  cats:[['tatuajes','Tatuajes'],['piercings','Piercings'],['otros','Otros']],
+  svc:[['tatuajes','machine','Tatuaje pequeño','Hasta 5 cm, líneas finas',60,600,1],
+       ['tatuajes','machine','Tatuaje mediano','Por sesión, de 10 a 15 cm',180,1500,1],
+       ['tatuajes','machine','Sesión grande','Sesión de 5 horas',300,3000,1],
+       ['tatuajes','star','Cotización de diseño','Platicamos tu idea',30,0],
+       ['piercings','ring','Piercing de oreja','Lóbulo, hélix o tragus',20,250,1],
+       ['piercings','ring','Piercing de nariz','Nostril o septum',20,300,1],
+       ['piercings','ring','Piercing de ombligo','',30,400],
+       ['otros','flame','Retoque','De un tatuaje hecho aquí',60,300,1]],
+  extra:[{id:'zona',label:'Zona del cuerpo',tipo:'chips',opts:['Brazo','Antebrazo','Espalda','Pierna','Mano','Otra']},
+         {id:'tam',label:'Tamaño aproximado',tipo:'chips',opts:['Chico (5 cm)','Mediano (10–15 cm)','Grande']},
+         {id:'idea',label:'Describe tu idea',tipo:'area',ph:'Ej. Un dragón japonés con flores de cerezo'}],
+  notaDatos:'Al confirmar, mándanos tus fotos de referencia por WhatsApp con un toque.',
+  ejemploExtra:i=>({zona:['Antebrazo','Espalda','Brazo','Pierna'][i%4],tam:['Chico (5 cm)','Mediano (10–15 cm)'][i%2],idea:['Rosa con nombre','Lobo realista','Frase en letra fina','Mandala'][i%4]}),
+  resumenExtra:e=>[e.zona,e.tam,e.idea].filter(Boolean).join(' · '),
+ },
+ renta:{
+  nombre:'Casas Bahía Azul',giro:'Casas en renta',ico:'palm',tag:'RENTA VACACIONAL · MANZANILLO',folio:'R',renta:1,
+  tema:{bg:'#f7efe2',surf:'#fffcf6',ink:'#12303d',muted:'#6a7a80',pri:'#0f6c8f',pri2:'#f2b84b',hdr:'#0f4c66',hdrInk:'#ffe9b8',line:'#e6dac6'},
+  pat:['wave','palm','sun','wave'],patOp:.2,
+  hero:['Reserva tu casa','en la playa'],sub:'Elige la casa y tus noches. Solo ves las fechas libres.',
+  checkin:720,checkout:660,
+  casas:[{id:'coral',nombre:'Casa Coral',cap:6,precio:2800,desc:'3 recámaras · alberca · a 2 cuadras del mar',am:['🛏 3 recámaras','🏊 Alberca','🅿️ Cochera','📶 WiFi'],grad:['#9fd3e0','#0f6c8f']},
+         {id:'palmar',nombre:'Casa Palmar',cap:4,precio:2200,desc:'2 recámaras · terraza con vista al mar',am:['🛏 2 recámaras','🌅 Vista al mar','🍖 Asador','📶 WiFi'],grad:['#ffd9a0','#e08a3c']},
+         {id:'marea',nombre:'Depa Marea',cap:2,precio:1400,desc:'1 recámara · frente a la playa',am:['🛏 1 recámara','🏖 Frente a la playa','❄️ Clima','📶 WiFi'],grad:['#bfe6d8','#2a8f74']},
+         {id:'brisa',nombre:'Villa Brisa',cap:10,precio:4500,desc:'5 recámaras · alberca y jardín',am:['🛏 5 recámaras','🏊 Alberca','🌴 Jardín','🍖 Asador'],grad:['#d6c8f0','#5b4a9e']}],
+ },
+ barber:{
+  nombre:'Barbería El Ancla',giro:'Barbería',ico:'anchor',tag:'BARBER SHOP',folio:'B',
+  tema:{bg:'#eef0f3',surf:'#ffffff',ink:'#13233a',muted:'#5c6878',pri:'#13233a',pri2:'#c8a15a',hdr:'#13233a',hdrInk:'#e8cf98',line:'#d9dee5'},
+  pat:['anchor','scissors','razor','beard'],patOp:.14,
+  hero:['Aparta','tu corte'],sub:'Elige servicio y barbero. Solo ves los horarios libres.',
+  horario:{0:[600,840],1:[600,1200],2:[600,1200],3:[600,1200],4:[600,1200],5:[600,1200],6:[600,1200]},
+  personal:[{id:'tono',nombre:'Toño',puesto:'Barbero',cats:['cortes','barba','extras']},{id:'luis',nombre:'Luis',puesto:'Barbero',cats:['cortes','barba','extras']}],
+  cats:[['cortes','Cortes'],['barba','Barba'],['extras','Extras']],
+  svc:[['cortes','scissors','Corte clásico','Tijera y máquina',40,150],
+       ['cortes','scissors','Fade / degradado','',45,180],
+       ['cortes','scissors','Corte de niño','Hasta 12 años',30,120],
+       ['barba','razor','Barba con toalla caliente','Perfilado y navaja',30,120],
+       ['barba','beard','Corte + barba','El combo completo',60,250],
+       ['extras','spark','Diseño / líneas','',20,60],
+       ['extras','spark','Mascarilla negra','',20,100],
+       ['extras','razor','Ceja','',10,50]],
+ },
+ dental:{
+  nombre:'Dental Sonrisa',giro:'Consultorio dental',ico:'tooth',tag:'CONSULTORIO DENTAL',folio:'D',
+  tema:{bg:'#eef7fc',surf:'#ffffff',ink:'#0f2a40',muted:'#5d7487',pri:'#2b7fd4',pri2:'#35c2b0',hdr:'#0f3a60',hdrInk:'#d6ecff',line:'#d5e6f2'},
+  pat:['tooth','spark','tooth','star'],patOp:.16,
+  hero:['Agenda','tu consulta'],sub:'Elige el tratamiento y te mostramos los horarios libres.',
+  horario:{1:[540,1140],2:[540,1140],3:[540,1140],4:[540,1140],5:[540,1140],6:[540,840]},
+  personal:[{id:'lucia',nombre:'Dra. Lucía',puesto:'Odontóloga',cats:['general','estetica','orto']},{id:'ramiro',nombre:'Dr. Ramiro',puesto:'Ortodoncista',cats:['general','orto']}],
+  cats:[['general','General'],['estetica','Estética'],['orto','Ortodoncia']],
+  svc:[['general','tooth','Valoración','Revisión y plan de tratamiento',30,300],
+       ['general','spark','Limpieza dental','Con ultrasonido',45,600],
+       ['general','tooth','Resina','Por pieza',60,700,1],
+       ['general','tooth','Extracción simple','',45,800,1],
+       ['estetica','spark','Blanqueamiento','En consultorio',90,2500],
+       ['orto','brace','Valoración de ortodoncia','',45,400],
+       ['orto','brace','Ajuste de brackets','',30,500]],
+  extra:[{id:'primera',label:'¿Es tu primera visita?',tipo:'chips',opts:['Sí, primera vez','Ya soy paciente']}],
+  ejemploExtra:i=>({primera:['Sí, primera vez','Ya soy paciente'][i%2]}),
+  resumenExtra:e=>e.primera||'',
+ },
+ fisio:{
+  nombre:'Fisio Movimiento',giro:'Fisioterapia',ico:'move',tag:'FISIOTERAPIA Y REHABILITACIÓN',folio:'F',
+  tema:{bg:'#ecf6f5',surf:'#ffffff',ink:'#0f2e2d',muted:'#5a7471',pri:'#0e8f8a',pri2:'#7aa83f',hdr:'#0d4d4a',hdrInk:'#c8f0ea',line:'#d3e8e5'},
+  pat:['move','hand','bolt','move'],patOp:.16,
+  hero:['Agenda','tu sesión'],sub:'Elige tu terapia y te mostramos los horarios libres.',
+  horario:{1:[480,1200],2:[480,1200],3:[480,1200],4:[480,1200],5:[480,1200],6:[540,780]},
+  personal:[{id:'daniel',nombre:'Lic. Daniel',puesto:'Fisioterapeuta',cats:['rehab','masaje','deportiva']}],
+  cats:[['rehab','Rehabilitación'],['masaje','Masajes'],['deportiva','Deportiva']],
+  svc:[['rehab','hand','Valoración inicial','Revisamos tu caso',45,400],
+       ['rehab','move','Sesión de rehabilitación','',60,450],
+       ['rehab','bolt','Electroterapia','',30,250],
+       ['masaje','hand','Masaje descontracturante','',60,500],
+       ['masaje','hand','Masaje relajante','',60,450],
+       ['deportiva','move','Terapia deportiva','Lesiones y prevención',60,500],
+       ['deportiva','tape','Vendaje neuromuscular','',20,200]],
+  extra:[{id:'zona',label:'¿Dónde está la molestia?',tipo:'chips',opts:['Espalda','Cuello','Hombro','Rodilla','Tobillo','Otra']}],
+  ejemploExtra:i=>({zona:['Espalda','Rodilla','Cuello','Hombro'][i%4]}),
+  resumenExtra:e=>e.zona?`Molestia: ${e.zona}`:'',
+ },
+ unas:{
+  nombre:'Pétalo Nails & Spa',giro:'Uñas y estética',ico:'petal',tag:'NAILS & SPA',folio:'P',
+  tema:{bg:'#fbeef1',surf:'#fffafb',ink:'#3b1426',muted:'#86606f',pri:'#c2477a',pri2:'#d9a441',hdr:'#3b1426',hdrInk:'#ffd3e2',line:'#f0d6de'},
+  pat:['petal','spark','polish','petal'],patOp:.18,
+  hero:['Agenda','tu cita'],sub:'Elige uno o varios servicios y te mostramos los horarios libres.',
+  horario:{1:[600,1200],2:[600,1200],3:[600,1200],4:[600,1200],5:[600,1200],6:[600,1200]},
+  personal:[{id:'fer',nombre:'Fer',puesto:'Manicurista',cats:['manos','pies','pestanas']},{id:'majo',nombre:'Majo',puesto:'Lashista y manicurista',cats:['manos','pestanas']}],
+  cats:[['manos','Manos'],['pies','Pies'],['pestanas','Pestañas y cejas']],
+  svc:[['manos','polish','Uñas acrílicas','Largo y diseño a tu gusto',120,450,1],
+       ['manos','polish','Gelish en manos','',60,250],
+       ['manos','petal','Retiro y retoque','',60,200],
+       ['manos','petal','Manicure spa','',45,200],
+       ['pies','foot','Pedicure spa','Exfoliación y masaje',60,350],
+       ['pies','polish','Gelish en pies','',45,220],
+       ['pestanas','eye','Lifting de pestañas','',60,400],
+       ['pestanas','eye','Diseño de ceja','',30,150]],
+ },
+};
+const ORDEN=['vet','tattoo','renta','barber','dental','fisio','unas'];
+const MI_WHATSAPP='523121150705';   // WhatsApp de Joseph para el aviso "¿te interesa?"
+const MI_MARCA='JC Desarrollo de Software';
+
+</script>
+<script>
+/* ====== DEMO AGENDA MULTI-GIRO ======
+   Sin servidor: cada giro guarda sus citas en el navegador (localStorage).
+   ?giro=vet abre directo un giro.                                   */
+const $=s=>document.querySelector(s);
+const ic=n=>`<svg viewBox="0 0 24 24" aria-hidden="true">${SVG[n]||''}</svg>`;
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const DIAS=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'],DIASL=['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+const MESES=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const WA_ICO='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.3 14.2c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.5-3.9-4.7-4.1-.1-.2-1.1-1.5-1.1-2.9s.7-2.1 1-2.4c.3-.3.6-.3.8-.3h.6c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.4.6-.4.4c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.4 1.5.3.1.5.1.6-.1l.9-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.3z"/></svg>';
+
+/* ---------- fechas ---------- */
+const hoy0=()=>{const d=new Date();d.setHours(0,0,0,0);return d};
+const iso=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const deIso=s=>{const[a,m,d]=s.split('-').map(Number);return new Date(a,m-1,d)};
+const sumar=(s,n)=>{const d=deIso(s);d.setDate(d.getDate()+n);return iso(d)};
+const difDias=(a,b)=>Math.round((deIso(b)-deIso(a))/864e5);
+const ahoraMin=()=>{const d=new Date();return d.getHours()*60+d.getMinutes()};
+const hora=m=>{const h=Math.floor(m/60),mi=m%60;return `${h%12||12}:${String(mi).padStart(2,'0')} ${h<12?'am':'pm'}`};
+const cap=t=>t[0].toUpperCase()+t.slice(1);
+const fechaL=s=>{const d=deIso(s);return `${DIASL[d.getDay()]} ${d.getDate()} de ${MESES[d.getMonth()]}`};
+const fechaC=s=>{const d=deIso(s);return `${DIAS[d.getDay()]} ${d.getDate()} ${MESES[d.getMonth()].slice(0,3)}`};
+const dur=m=>m<60?`${m} min`:`${Math.floor(m/60)} h${m%60?` ${m%60} min`:''}`;
+const dinero=n=>'$'+Math.round(n).toLocaleString('es-MX');
+
+/* ---------- servicios normalizados ---------- */
+for(const k of ORDEN){const g=GIROS[k];g.k=k;
+  if(g.svc)g.servicios=g.svc.map((s,i)=>({id:i+1,cat:s[0],ico:s[1],nombre:s[2],desc:s[3],min:s[4],precio:s[5],desde:!!s[6]}));}
+const precioTxt=s=>s.precio===0?'Gratis':(s.desde?'desde ':'')+dinero(s.precio);
+
+/* ---------- almacenamiento ---------- */
+const LS={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+let DB={};                      // datos por giro {citas:[], folio:n}
+function cargar(k){const v=LS.get('dg1-'+k,null);DB[k]=v&&v.citas?v:sembrar(k);guardar(k)}
+function guardar(k){LS.set('dg1-'+k,DB[k])}
+
+/* ---------- citas de ejemplo ---------- */
+function rng(seed){let s=seed%2147483647||7;return()=>(s=s*16807%2147483647)/2147483647}
+function sembrar(k){
+  const g=GIROS[k],r=rng(iso(hoy0()).split('-').join('')*1+k.length*97),db={citas:[],folio:1001};
+  const nombre=i=>NOMBRES[(i*7+k.length)%NOMBRES.length];
+  const tel=()=>'312'+String(Math.floor(r()*9e6)+1e6);
+  let n=0;
+  if(g.renta){
+    const hoy=iso(hoy0());
+    for(const c of g.casas){
+      let d=sumar(hoy,-Math.floor(r()*3)-1);
+      for(let j=0;j<6;j++){
+        const noches=1+Math.floor(r()*4),inn=d,out=sumar(inn,noches);
+        if(difDias(hoy,inn)>50)break;
+        db.citas.push({folio:g.folio+'-'+db.folio++,casa:c.id,in:inn,out,noches,total:noches*c.precio,nombre:nombre(n),tel:tel(),
+          extra:{huespedes:String(Math.max(1,Math.min(c.cap,2+Math.floor(r()*c.cap)))),mascota:r()<.2?'Sí':'No'},
+          estado:difDias(hoy,out)<=0?'llego':(difDias(hoy,inn)<0?'llego':'pendiente'),ejemplo:1});
+        n++;d=sumar(out,2+Math.floor(r()*8));
+      }
+    }
+    return db;
+  }
+  const hoy=iso(hoy0()),ahora=ahoraMin();
+  for(let dd=0;dd<7;dd++){
+    const f=sumar(hoy,dd),h=g.horario[deIso(f).getDay()];if(!h)continue;
+    const cuantas=dd===0?5:2+Math.floor(r()*3);
+    for(let i=0,intent=0;i<cuantas&&intent<40;intent++){
+      const s=g.servicios[Math.floor(r()*g.servicios.length)];
+      const t=h[0]+Math.floor(r()*((h[1]-h[0]-s.min)/30))*30;
+      const p=armarPlan(k,f,t,[s.id],null,db.citas);
+      if(!p)continue;
+      const fin=t+s.min;
+      let estado='pendiente';
+      if(dd===0&&fin<=ahora)estado=i===1?'no':'llego';
+      db.citas.push({folio:g.folio+'-'+db.folio++,fecha:f,partes:p,nombre:nombre(n),tel:tel(),
+        extra:g.ejemploExtra?g.ejemploExtra(n):{},estado,ejemplo:1});
+      n++;i++;
+    }
+  }
+  return db;
+}
+
+/* ---------- disponibilidad (por horas) ---------- */
+const enciman=(a1,b1,a2,b2)=>a1<b2&&a2<b1;
+function libre(k,fecha,staff,a,b,citas){
+  return !(citas||DB[k].citas).some(c=>c.fecha===fecha&&c.estado!=='cancelada'&&c.partes.some(p=>p.staff===staff&&enciman(a,b,p.ini,p.ini+p.min)));
+}
+function armarPlan(k,fecha,t,ids,quien,citas){
+  const g=GIROS[k],h=g.horario[deIso(fecha).getDay()];if(!h)return null;
+  let cur=t;const partes=[];
+  for(const id of ids){
+    const s=g.servicios.find(x=>x.id===id);
+    const cands=g.personal.filter(p=>(!quien||p.id===quien)&&p.cats.includes(s.cat));
+    const ok=cands.find(p=>libre(k,fecha,p.id,cur,cur+s.min,citas));
+    if(!ok||cur+s.min>h[1])return null;
+    partes.push({svc:s.id,staff:ok.id,ini:cur,min:s.min});cur+=s.min;
+  }
+  return partes;
+}
+function horarios(k,fecha,ids,quien){
+  const g=GIROS[k],h=g.horario[deIso(fecha).getDay()];if(!h)return[];
+  const total=ids.reduce((a,id)=>a+g.servicios.find(s=>s.id===id).min,0);
+  const esHoy=fecha===iso(hoy0()),ya=ahoraMin()+30,out=[];
+  for(let t=h[0];t+total<=h[1];t+=30){
+    out.push({t,libre:!(esHoy&&t<ya)&&!!armarPlan(k,fecha,t,ids,quien)});
+  }
+  return out;
+}
+
+/* ---------- disponibilidad (renta por noches) ---------- */
+function nocheOcupada(casa,f){return DB.renta.citas.some(c=>c.casa===casa&&c.estado!=='cancelada'&&c.in<=f&&f<c.out)}
+function rangoLibre(casa,a,b){for(let f=a;f<b;f=sumar(f,1))if(nocheOcupada(casa,f))return false;return true}
+
+/* ---------- estado de la pantalla ---------- */
+const S={k:'vet',vista:'cliente',hoja:false,cat:'todo',cart:[],quien:null,fecha:null,hora:null,
+  datos:{nombre:'',tel:'',extra:{}},err:{},ticket:null,
+  casa:null,in:null,out:null,mes:null,
+  pTab:'hoy',pFecha:null,pIni:null,instalar:null,ios:false};
+function reset(keepGiro){Object.assign(S,{cat:'todo',cart:[],quien:null,fecha:null,hora:null,datos:{nombre:'',tel:'',extra:{}},err:{},ticket:null,casa:null,in:null,out:null,mes:null,pTab:GIROS[S.k].renta?'ocup':'hoy',pFecha:iso(hoy0()),pIni:iso(hoy0())})}
+const G=()=>GIROS[S.k];
+
+function tema(){const g=G(),r=document.documentElement.style;for(const[k,v]of Object.entries(g.tema))r.setProperty('--'+k,v);
+  document.body.classList.toggle('oscuro',!!g.oscuro);
+  document.querySelector('meta[name=theme-color]').setAttribute('content',g.tema.hdr);
+  document.title=`${g.nombre} · Demo de agenda`;}
+function patron(g,alto,colorFijo){let s='';const r=rng(g.k.length*131+alto);
+  for(let i=0;i<18;i++){const n=g.pat[i%g.pat.length],z=22+r()*30;
+    s+=`<svg viewBox="0 0 24 24" style="left:${(r()*104-4).toFixed(1)}%;top:${(r()*alto-12).toFixed(0)}px;width:${z.toFixed(0)}px;height:${z.toFixed(0)}px;opacity:${g.patOp};transform:rotate(${(r()*60-30).toFixed(0)}deg)${colorFijo?';color:'+colorFijo:''}">${SVG[n]}</svg>`}
+  return `<div class="pat">${s}</div>`}
+
+/* ---------- vistas comunes ---------- */
+function vDemobar(){return `<div class="demobar"><span class="lbl">DEMO</span><span class="sp">Agenda digital para tu negocio</span>
+  <button class="vista" data-act="hoja">${ic(G().ico)} Giro ▾</button><button class="vista" data-act="vista">${S.vista==='cliente'?'Ver panel →':'← Ver como cliente'}</button></div>`}
+function vHdr(){const g=G();return `<header class="hdr"><div class="l1">${ic(g.ico)}<span class="nm">${esc(g.nombre)}</span></div><div class="tg">${g.tag}${S.vista==='panel'?' · PANEL':''}</div></header>`}
+function vHero(){const g=G();return `<section class="hero">${patron(g,230)}
+  <button class="giro" data-act="hoja">${ic('spark')} Cambiar giro ▾</button>
+  <h1 class="h1"><span class="a">${g.hero[0]}</span><span class="b">${g.hero[1]}</span></h1><p>${g.sub}</p></section>`}
+function vMio(){const g=G();const txt=encodeURIComponent(`Hola Joseph, vi la demo de la agenda digital (${g.giro}) y me interesa para mi negocio.`);
+  return `<div class="mio"><img src="icons/icon-192.png" alt=""><div><b>¿Una agenda así para tu negocio?</b><small>Se adapta a tu giro, tus servicios y tus colores.</small></div><a href="https://wa.me/${MI_WHATSAPP}?text=${txt}" target="_blank" rel="noopener">Escríbeme</a></div>
+  <p class="firma">Demo hecha por ${MI_MARCA}</p>`}
+function vHoja(){if(!S.hoja)return'';
+  return `<div class="over" data-act="cerrar"></div><div class="bs" role="dialog" aria-label="Cambiar giro"><div class="gr"></div><button class="x" data-act="cerrar" aria-label="Cerrar">✕</button>
+  <h3>¿Qué negocio quieres ver?</h3><p>La demo cambia completa: servicios, colores y panel.</p>
+  ${ORDEN.map(k=>{const x=GIROS[k];return `<button class="opt" data-act="giro" data-v="${k}" aria-pressed="${k===S.k}"><span class="sw" style="background:${x.tema.hdr};color:${x.tema.hdrInk}">${ic(x.ico)}</span><span><b>${x.giro}</b><small>${x.nombre}</small></span>${k===S.k?'<span class="ck">✓</span>':''}</button>`}).join('')}
+  <div class="acc"><button data-act="reiniciar">↺ Reiniciar demo</button>${S.instalar||S.ios?`<button data-act="instalar">📲 Instalar en el celular</button>`:''}</div>
+  ${S.verIos?`<div class="ios">En iPhone: toca <b>Compartir</b> (el cuadrito con flecha) y luego <b>Agregar a inicio</b>.</div>`:''}
+  <p style="margin:10px 0 0;font-size:11.5px">“Reiniciar” borra las citas de prueba y deja la demo como nueva para enseñarla.</p></div>`}
+
+/* ---------- lado cliente: por horas ---------- */
+function totales(){const g=G();const ss=S.cart.map(id=>g.servicios.find(s=>s.id===id));
+  return{min:ss.reduce((a,s)=>a+s.min,0),precio:ss.reduce((a,s)=>a+s.precio,0),desde:ss.some(s=>s.desde),n:ss.length}}
+function vServicios(){const g=G();
+  const cats=S.cat==='todo'?g.cats:g.cats.filter(c=>c[0]===S.cat);
+  return `<section class="card step"><div class="stp"><i>1</i>Servicios<small>Puedes elegir varios</small></div>
+  <div class="chips scroll"><button class="chip" data-act="cat" data-v="todo" aria-pressed="${S.cat==='todo'}">Todo</button>${g.cats.map(c=>`<button class="chip" data-act="cat" data-v="${c[0]}" aria-pressed="${S.cat===c[0]}">${c[1]}</button>`).join('')}</div>
+  ${cats.map(([ck,cn])=>`<div class="catT">${cn}</div>`+g.servicios.filter(s=>s.cat===ck).map(s=>{const on=S.cart.includes(s.id);
+    return `<div class="sv"><div class="ill">${ic(s.ico)}</div><div class="t"><b>${esc(s.nombre)}</b>${s.desc?`<div class="d">${esc(s.desc)}</div>`:''}<div class="m">${dur(s.min)} · <b>${precioTxt(s)}</b></div></div>
+    <button class="btn ${on?'':'o'} sm" data-act="toggle" data-v="${s.id}" aria-pressed="${on}">${on?'✓ Agregado':'Agregar'}</button></div>`}).join('')).join('')}</section>`}
+function staffValido(){const g=G();return g.personal.filter(p=>S.cart.every(id=>p.cats.includes(g.servicios.find(s=>s.id===id).cat)))}
+function vQuien(){const g=G();if(g.personal.length<2)return'';
+  const val=staffValido();const ok=S.cart.length>0;
+  return `<section class="card step ${ok?'':'locked'}" id="st2"><div class="stp"><i>2</i>¿Con quién?</div>
+  ${ok&&!val.length?`<p class="empty">Estos servicios los hacen personas distintas; te asignamos a quien esté libre en cada uno.</p>`:''}
+  <div class="people"><button class="person" data-act="quien" data-v="" aria-pressed="${!S.quien}"><span class="av">★</span><b>Cualquiera</b><small>Quien esté libre</small></button>
+  ${val.map(p=>`<button class="person" data-act="quien" data-v="${p.id}" aria-pressed="${S.quien===p.id}"><span class="av">${p.nombre.replace(/^(Dra?\.|Lic\.)\s*/,'')[0]}</span><b>${esc(p.nombre)}</b><small>${esc(p.puesto)}</small></button>`).join('')}</div></section>`}
+function dias14(){const out=[];for(let i=0;i<14;i++)out.push(sumar(iso(hoy0()),i));return out}
+function vDiaHora(){const g=G(),n=g.personal.length<2?2:3,ok=S.cart.length>0,t=totales();
+  let slots='';
+  if(ok&&S.fecha){const hs=horarios(S.k,S.fecha,S.cart,S.quien);
+    if(!hs.length)slots='<p class="empty">Ese día está cerrado.</p>';
+    else if(!hs.some(h=>h.libre))slots='<p class="empty">Ya no hay horarios libres este día. Prueba otro.</p>';
+    else{const man=hs.filter(h=>h.t<720),tar=hs.filter(h=>h.t>=720);
+      const grid=a=>`<div class="slots">${a.map(h=>`<button class="slot" data-act="hora" data-v="${h.t}" ${h.libre?'':'disabled'} aria-pressed="${S.hora===h.t}">${hora(h.t)}</button>`).join('')}</div>`;
+      slots=(man.length?`<div class="slT">MAÑANA</div>${grid(man)}`:'')+(tar.length?`<div class="slT">TARDE</div>${grid(tar)}`:'');}
+  }
+  return `<section class="card step ${ok?'':'locked'}" id="st3"><div class="stp"><i>${n}</i>Día y hora${ok?`<small>Tu cita dura ${dur(t.min)}</small>`:''}</div>
+  <div class="days">${dias14().map(f=>{const d=deIso(f),cerr=!g.horario[d.getDay()];
+    return `<button class="day" data-act="fecha" data-v="${f}" ${cerr?'disabled':''} aria-pressed="${S.fecha===f}"><small>${f===iso(hoy0())?'Hoy':DIAS[d.getDay()]}</small><b>${d.getDate()}</b><small>${cerr?'Cerrado':MESES[d.getMonth()].slice(0,3)}</small></button>`}).join('')}</div>
+  ${ok&&!S.fecha?'<p class="empty">Elige un día para ver los horarios libres.</p>':''}${slots}</section>`}
+function vExtra(g){return (g.extra||[]).map(f=>{const v=S.datos.extra[f.id]||'';
+  if(f.tipo==='chips')return `<div class="fld"><label>${f.label}</label><div class="chips">${f.opts.map(o=>`<button class="chip" data-act="extra" data-f="${f.id}" data-v="${esc(o)}" aria-pressed="${v===o}">${o}</button>`).join('')}</div></div>`;
+  if(f.tipo==='area')return `<div class="fld"><label for="x-${f.id}">${f.label}</label><textarea id="x-${f.id}" data-in="extra" data-f="${f.id}" placeholder="${esc(f.ph||'')}">${esc(v)}</textarea></div>`;
+  return `<div class="fld"><label for="x-${f.id}">${f.label}</label><input id="x-${f.id}" data-in="extra" data-f="${f.id}" value="${esc(v)}" placeholder="${esc(f.ph||'')}">${S.err[f.id]?`<div class="err">${S.err[f.id]}</div>`:''}</div>`}).join('')}
+function vDatos(){const g=G(),n=g.personal.length<2?3:4,ok=S.hora!=null;
+  return `<section class="card step ${ok?'':'locked'}" id="st4"><div class="stp"><i>${n}</i>${g.k==='vet'?'Tus datos y los de tu mascota':g.k==='tattoo'?'Cuéntanos tu idea':'Tus datos'}</div>
+  ${vExtra(g)}
+  <div class="fld"><label for="c-nom">Tu nombre</label><input id="c-nom" data-in="nombre" value="${esc(S.datos.nombre)}" autocomplete="name" placeholder="Nombre y apellido">${S.err.nombre?`<div class="err">${S.err.nombre}</div>`:''}</div>
+  <div class="fld"><label for="c-tel">Teléfono (10 dígitos)</label><input id="c-tel" data-in="tel" value="${esc(S.datos.tel)}" inputmode="tel" autocomplete="tel" placeholder="312 000 0000">${S.err.tel?`<div class="err">${S.err.tel}</div>`:''}</div>
+  ${g.notaDatos?`<div class="note">${ic('star')}<div>${g.notaDatos}</div></div>`:''}
+  </section><button class="cta" data-act="confirmar" ${ok?'':'disabled'}>Confirmar cita</button>`}
+function vFootHoras(){const t=totales();if(!t.n||S.ticket)return'';
+  const txt=S.hora!=null?`${fechaC(S.fecha)} · ${hora(S.hora)}`:`${dur(t.min)} en total`;
+  return `<div class="foot"><div class="in"><div><b>${t.n} servicio${t.n>1?'s':''} · ${t.precio?(t.desde?'desde ':'')+dinero(t.precio):'Gratis'}</b><small>${txt}</small></div>
+  <button class="btn" data-act="${S.hora!=null?'irDatos':'irHora'}">${S.hora!=null?'Mis datos':'Elegir horario'}</button></div></div>`}
+
+/* ---------- lado cliente: renta ---------- */
+function casa(id){return G().casas.find(c=>c.id===id)}
+function vCasas(){const g=G();
+  return `<section class="card step"><div class="stp"><i>1</i>Elige la casa</div>
+  ${g.casas.map(c=>`<article class="casa" aria-pressed="${S.casa===c.id}">
+    <div class="ph" style="background:linear-gradient(160deg,${c.grad[0]},${c.grad[1]})">${patron({...g,k:c.id},128,'#fff')}<svg class="big" viewBox="0 0 24 24">${SVG.house}</svg></div>
+    <div class="bd"><b>${c.nombre}</b><div class="d">Hasta ${c.cap} huéspedes · ${c.desc}</div><div class="am">${c.am.map(a=>`<span>${a}</span>`).join('')}</div>
+    <div class="pr"><span><b>${dinero(c.precio)}</b> <small>por noche</small></span><button class="btn ${S.casa===c.id?'':'o'}" data-act="casa" data-v="${c.id}">${S.casa===c.id?'✓ Elegida':'Elegir'}</button></div></div></article>`).join('')}
+  <div class="note">${ic('sun')}<div><b>Check-in 12:00 pm · Check-out 11:00 am</b><br>Solo escoge tus noches en el calendario.</div></div></section>`}
+function vCalendario(){const g=G(),ok=!!S.casa,hoy=iso(hoy0());
+  const base=S.mes||hoy.slice(0,7)+'-01',d0=deIso(base),primero=(d0.getDay()+6)%7,diasMes=new Date(d0.getFullYear(),d0.getMonth()+1,0).getDate();
+  const minMes=hoy.slice(0,7)+'-01',maxMes=(()=>{const x=hoy0();x.setDate(1);x.setMonth(x.getMonth()+5);return iso(x)})();
+  let cells=['L','M','M','J','V','S','D'].map(x=>`<div class="dw">${x}</div>`).join('')+'<div></div>'.repeat(primero);
+  for(let i=1;i<=diasMes;i++){const f=iso(new Date(d0.getFullYear(),d0.getMonth(),i));
+    let cls='',lab='',dis=false;const oc=ok&&nocheOcupada(S.casa,f);
+    if(f<hoy)dis=true;
+    if(S.in&&f===S.in){cls='in'+(S.out?'':' solo');lab='<small>12 pm</small>'}
+    else if(S.out&&f===S.out){cls='out';lab='<small>11 am</small>'}
+    else if(S.in&&S.out&&f>S.in&&f<S.out)cls='mid';
+    else if(oc){cls='oc';
+      // un día ocupado sí puede ser tu día de salida
+      if(!(S.in&&!S.out&&f>S.in&&rangoLibre(S.casa,S.in,f)))dis=true;}
+    cells+=`<button class="${cls}" data-act="dia" data-v="${f}" ${dis||!ok?'disabled':''}>${i}${lab}</button>`}
+  const hint=!S.in?'Toca tu día de llegada.':!S.out?'Ahora toca tu día de salida.':'';
+  return `<section class="card step ${ok?'':'locked'}" id="st3"><div class="stp"><i>2</i>Tus noches</div>
+  <div class="mes"><button data-act="mes" data-v="-1" ${base<=minMes?'disabled':''} aria-label="Mes anterior">‹</button><b>${MESES[d0.getMonth()]} ${d0.getFullYear()}</b><button data-act="mes" data-v="1" ${base>=maxMes?'disabled':''} aria-label="Mes siguiente">›</button></div>
+  <div class="cal">${cells}</div>
+  <div class="leg"><span><i style="background:var(--pri)"></i>Llegada / salida</span><span><i style="background:color-mix(in srgb,var(--pri) 18%,#fff)"></i>Tus noches</span><span><i style="background:#e4ddd0"></i>Ocupado</span></div>
+  ${hint&&ok?`<p class="empty" style="padding-bottom:0">${hint}</p>`:''}
+  ${S.in&&S.out?`<div style="margin-top:10px"><div class="kv"><span>Llegada</span><b>${fechaC(S.in)} · 12:00 pm</b></div><div class="kv"><span>Salida</span><b>${fechaC(S.out)} · 11:00 am</b></div><div class="kv"><span>Noches</span><b>${difDias(S.in,S.out)}</b></div></div>`:''}</section>`}
+function vDatosRenta(){const ok=S.in&&S.out,c=S.casa&&casa(S.casa),v=S.datos.extra;
+  return `<section class="card step ${ok?'':'locked'}" id="st4"><div class="stp"><i>3</i>Tus datos</div>
+  <div class="fld"><label for="c-nom">Nombre</label><input id="c-nom" data-in="nombre" value="${esc(S.datos.nombre)}" autocomplete="name" placeholder="Nombre y apellido">${S.err.nombre?`<div class="err">${S.err.nombre}</div>`:''}</div>
+  <div class="fld"><label for="c-tel">Teléfono (10 dígitos)</label><input id="c-tel" data-in="tel" value="${esc(S.datos.tel)}" inputmode="tel" placeholder="312 000 0000">${S.err.tel?`<div class="err">${S.err.tel}</div>`:''}</div>
+  <div class="fld"><label>Huéspedes ${c?`<span style="font-weight:400;color:var(--muted)">(máx. ${c.cap})</span>`:''}</label><div class="chips">${c?Array.from({length:c.cap},(_,i)=>String(i+1)).map(o=>`<button class="chip" data-act="extra" data-f="huespedes" data-v="${o}" aria-pressed="${v.huespedes===o}">${o}</button>`).join(''):''}</div>${S.err.huespedes?`<div class="err">${S.err.huespedes}</div>`:''}</div>
+  <div class="fld"><label>¿Traes mascota?</label><div class="chips">${['No','Sí'].map(o=>`<button class="chip" data-act="extra" data-f="mascota" data-v="${o}" aria-pressed="${(v.mascota||'No')===o}">${o}</button>`).join('')}</div></div>
+  ${ok?`<div class="kv"><span>${difDias(S.in,S.out)} noche${difDias(S.in,S.out)>1?'s':''} × ${dinero(c.precio)}</span><b>${dinero(difDias(S.in,S.out)*c.precio)}</b></div><div class="tot"><span>Total aprox.</span><span>${dinero(difDias(S.in,S.out)*c.precio)}</span></div>`:''}
+  </section><button class="cta" data-act="confirmarR" ${ok?'':'disabled'}>Confirmar reservación</button>`}
+function vFootRenta(){if(!S.casa||S.ticket)return'';const c=casa(S.casa);
+  if(!(S.in&&S.out))return `<div class="foot"><div class="in"><div><b>${c.nombre}</b><small>${dinero(c.precio)} por noche</small></div><button class="btn" data-act="irHora">Elegir fechas</button></div></div>`;
+  const n=difDias(S.in,S.out);
+  return `<div class="foot"><div class="in"><div><b>${n} noche${n>1?'s':''} · ${dinero(n*c.precio)}</b><small>${c.nombre}</small></div><button class="btn" data-act="irDatos">Continuar</button></div></div>`}
+
+/* ---------- ticket ---------- */
+function vTicket(){const g=G(),c=S.ticket;
+  let filas='',msg='',total='';
+  if(g.renta){const k=casa(c.casa);
+    filas=`<div class="row"><span class="hr">Casa</span><span>${k.nombre}</span></div><div class="row"><span class="hr">Llegada</span><span>${fechaL(c.in)} · 12:00 pm</span></div><div class="row"><span class="hr">Salida</span><span>${fechaL(c.out)} · 11:00 am</span></div><div class="row"><span class="hr">Huésped.</span><span>${c.extra.huespedes}${c.extra.mascota==='Sí'?' · con mascota':''}</span></div>`;
+    total=`${c.noches} noche${c.noches>1?'s':''} · ${dinero(c.total)}`;
+    msg=`Hola, reservé en ${g.nombre}.\nFolio: ${c.folio}\nCasa: ${k.nombre}\nLlegada: ${fechaL(c.in)} a las 12:00 pm\nSalida: ${fechaL(c.out)} a las 11:00 am\nHuéspedes: ${c.extra.huespedes}\nTotal aprox.: ${dinero(c.total)}\nA nombre de: ${c.nombre}`;
+  }else{
+    filas=c.partes.map(p=>{const s=g.servicios.find(x=>x.id===p.svc),st=g.personal.find(x=>x.id===p.staff);return `<div class="row"><span class="hr">${hora(p.ini)}</span><span>${esc(s.nombre)}${g.personal.length>1?' · '+st.nombre:''}</span></div>`}).join('');
+    const ex=g.resumenExtra?g.resumenExtra(c.extra):'';if(ex)filas+=`<div class="row"><span class="hr">Detalles</span><span>${esc(ex)}</span></div>`;
+    const t=c.partes.reduce((a,p)=>a+g.servicios.find(s=>s.id===p.svc).precio,0),desde=c.partes.some(p=>g.servicios.find(s=>s.id===p.svc).desde);
+    total=t?(desde?'desde ':'')+dinero(t)+' aprox.':'Gratis';
+    msg=`Hola, agendé una cita en ${g.nombre}.\nFolio: ${c.folio}\nDía: ${fechaL(c.fecha)}\n`+c.partes.map(p=>`• ${hora(p.ini)} ${g.servicios.find(s=>s.id===p.svc).nombre}`).join('\n')+(ex?`\nDetalles: ${ex}`:'')+`\nA nombre de: ${c.nombre}`;
+  }
+  return `<section class="card ticket"><div class="h">${g.renta?'RESERVACIÓN CONFIRMADA':'CITA CONFIRMADA'} · FOLIO ${c.folio}</div>
+  <div class="te">Te esperamos,</div><div class="nm">${esc(c.nombre.split(' ')[0])}</div>
+  <div class="box">${filas}<div class="row" style="border-top:1px solid var(--line);margin-top:6px;padding-top:7px"><span class="hr">Total</span><b>${total}</b></div></div>
+  <a class="wa" href="https://wa.me/?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener">${WA_ICO} Enviar por WhatsApp</a>
+  <button class="cta" style="width:100%;margin:10px 0 0" data-act="otra">${g.renta?'Hacer otra reservación':'Agendar otra cita'}</button>
+  <p class="empty" style="text-align:center">Tip: cambia a <b>“Ver panel del negocio”</b> arriba y verás esta ${g.renta?'reservación':'cita'} llegar.</p></section>`}
+
+/* ---------- panel del negocio ---------- */
+function citasDia(f){return DB[S.k].citas.filter(c=>c.fecha===f).sort((a,b)=>a.partes[0].ini-b.partes[0].ini)}
+function precioCita(c){const g=G();return c.partes.reduce((a,p)=>a+g.servicios.find(s=>s.id===p.svc).precio,0)}
+function botonesEstado(c){if(c.estado==='cancelada')return `<button class="btn o sm" data-act="estado" data-f="${c.folio}" data-v="pendiente">Reactivar</button>`;
+  const g=G();const quien=g.renta?'':`${c.nombre.split(' ')[0]}`;
+  const rec=g.renta?`Hola ${c.nombre.split(' ')[0]}, te recordamos tu reservación en ${g.nombre}: llegada ${fechaL(c.in)} a las 12:00 pm. Folio ${c.folio}. ¡Te esperamos!`
+    :`Hola ${quien}, te recordamos tu cita en ${g.nombre} el ${fechaL(c.fecha)} a las ${hora(c.partes[0].ini)}. Folio ${c.folio}. ¡Te esperamos!`;
+  return `<button class="btn ${c.estado==='llego'?'ok':'o'} sm" data-act="estado" data-f="${c.folio}" data-v="llego">Llegó</button>
+  <button class="btn ${c.estado==='no'?'bad':'o'} sm" data-act="estado" data-f="${c.folio}" data-v="no">No llegó</button>
+  <button class="btn o sm" data-act="estado" data-f="${c.folio}" data-v="cancelada">Cancelar</button>
+  <a class="btn o sm" style="text-decoration:none" href="https://wa.me/52${c.tel}?text=${encodeURIComponent(rec)}" target="_blank" rel="noopener">Recordatorio</a>`}
+const ESTADO={pendiente:'Pendiente',llego:'Llegó',no:'No llegó',cancelada:'Cancelada'};
+function vPanelHoras(){const g=G(),hoy=iso(hoy0());
+  const tabs=`<nav class="ptabs">${[['hoy','Agenda del día'],['semana','Semana'],['servicios','Servicios']].map(t=>`<button data-act="ptab" data-v="${t[0]}" aria-pressed="${S.pTab===t[0]}">${t[1]}</button>`).join('')}</nav>`;
+  if(S.pTab==='semana'){const dias=[];for(let i=0;i<7;i++)dias.push(sumar(hoy,i));
+    const datos=dias.map(f=>{const cs=citasDia(f).filter(c=>c.estado!=='cancelada');return{f,n:cs.length,$:cs.reduce((a,c)=>a+precioCita(c),0)}});
+    const max=Math.max(1,...datos.map(d=>d.n));
+    return tabs+`<section class="card"><div class="stp">Próximos 7 días</div>${datos.map(d=>`<button class="wk" style="width:100%;text-align:left" data-act="irDia" data-v="${d.f}"><span class="dd">${d.f===hoy?'Hoy':fechaC(d.f)}</span><span class="bar"><i style="width:${d.n/max*100}%"></i></span><span class="n">${d.n} cita${d.n===1?'':'s'}<br>${dinero(d.$)}</span></button>`).join('')}</section>
+    <section class="card"><div class="kv"><span>Citas en la semana</span><b>${datos.reduce((a,d)=>a+d.n,0)}</b></div><div class="kv"><span>Ingreso estimado</span><b>${dinero(datos.reduce((a,d)=>a+d.$,0))}</b></div></section>`}
+  if(S.pTab==='servicios')return tabs+`<section class="card"><div class="stp">Servicios y precios</div>
+    ${g.cats.map(([ck,cn])=>`<div class="catT">${cn}</div>`+g.servicios.filter(s=>s.cat===ck).map(s=>`<div class="sv"><div class="ill">${ic(s.ico)}</div><div class="t"><b>${esc(s.nombre)}</b><div class="m">${dur(s.min)} · <b>${precioTxt(s)}</b></div></div><button class="btn o sm" data-act="aviso">Editar</button></div>`).join('')).join('')}</section>
+    <section class="card"><div class="stp">Equipo y horario</div>${g.personal.map(p=>`<div class="kv"><span>${esc(p.nombre)}</span><b>${esc(p.puesto)}</b></div>`).join('')}
+    <div class="kv"><span>Horario</span><b>${horarioTxt(g)}</b></div></section>`;
+  const f=S.pFecha,cs=citasDia(f),act=cs.filter(c=>c.estado!=='cancelada');
+  return tabs+`<div class="stats"><div class="stat"><b>${act.length}</b><small>citas</small></div><div class="stat"><b>${act.filter(c=>c.estado==='llego').length}</b><small>llegaron</small></div><div class="stat"><b>${dinero(act.reduce((a,c)=>a+precioCita(c),0))}</b><small>estimado</small></div></div>
+  <div class="dnav"><button data-act="pdia" data-v="-1" aria-label="Día anterior">‹</button><b>${f===hoy?'Hoy · '+fechaL(f):cap(fechaL(f))}</b><button data-act="pdia" data-v="1" aria-label="Día siguiente">›</button></div>
+  <section class="card">${cs.length?cs.map(c=>{const ex=g.resumenExtra?g.resumenExtra(c.extra):'';
+    return `<div class="cita ${c.estado}"><div class="hr">${hora(c.partes[0].ini)}<small>${dur(c.partes.reduce((a,p)=>a+p.min,0))}</small></div><div class="t">
+    <b>${esc(c.nombre)}</b><span class="est ${c.estado}">${ESTADO[c.estado]}</span>
+    <div class="s">${c.partes.map(p=>esc(g.servicios.find(s=>s.id===p.svc).nombre)+(g.personal.length>1?' · '+g.personal.find(x=>x.id===p.staff).nombre:'')).join(' + ')}</div>
+    ${ex?`<div class="s">${esc(ex)}</div>`:''}<div class="s">${c.folio} · ${c.tel.replace(/(\d{3})(\d{3})(\d{4})/,'$1 $2 $3')}${c.ejemplo?'':' · <b style="color:var(--pri)">nueva</b>'}</div>
+    <div class="acts">${botonesEstado(c)}</div></div></div>`}).join(''):`<p class="empty">${g.horario[deIso(f).getDay()]?'No hay citas este día.':'Este día el negocio está cerrado.'}</p>`}</section>`}
+function horarioTxt(g){const grupos={};for(let d=1;d<=7;d++){const k=d%7,h=g.horario[k];const t=h?`${hora(h[0])}–${hora(h[1])}`:'Cerrado';(grupos[t]=grupos[t]||[]).push(DIAS[k])}
+  return Object.entries(grupos).map(([t,ds])=>`${ds.length>2?ds[0]+'–'+ds[ds.length-1]:ds.join(', ')} ${t}`).join(' · ')}
+function vPanelRenta(){const g=G(),hoy=iso(hoy0());
+  const tabs=`<nav class="ptabs">${[['ocup','Ocupación'],['reservas','Reservaciones'],['casas','Casas']].map(t=>`<button data-act="ptab" data-v="${t[0]}" aria-pressed="${S.pTab===t[0]}">${t[1]}</button>`).join('')}</nav>`;
+  const activas=DB.renta.citas.filter(c=>c.estado!=='cancelada');
+  if(S.pTab==='casas')return tabs+`<section class="card"><div class="stp">Tus casas</div>${g.casas.map(c=>`<div class="sv"><div class="ill">${ic('house')}</div><div class="t"><b>${c.nombre}</b><div class="m">Hasta ${c.cap} huéspedes · <b>${dinero(c.precio)}</b> / noche</div></div><button class="btn o sm" data-act="aviso">Editar</button></div>`).join('')}
+    <div class="note" style="margin-top:8px">${ic('sun')}<div>Check-in <b>12:00 pm</b> · Check-out <b>11:00 am</b> (lo cambias en la versión real).</div></div></section>`;
+  if(S.pTab==='reservas'){const prox=DB.renta.citas.filter(c=>c.out>=hoy).sort((a,b)=>a.in<b.in?-1:1);
+    return tabs+`<section class="card"><div class="stp">Próximas llegadas</div>${prox.map(c=>{const k=casa(c.casa);return `<div class="cita ${c.estado}"><div class="hr">${fechaC(c.in).split(' ').slice(1).join(' ')}<small>${c.noches} noche${c.noches>1?'s':''}</small></div><div class="t"><b>${esc(c.nombre)}</b><span class="est ${c.estado}">${c.in<=hoy&&c.estado==='llego'?'Hospedado':ESTADO[c.estado]}</span>
+    <div class="s">${k.nombre} · ${c.extra.huespedes} huésp.${c.extra.mascota==='Sí'?' · mascota':''}</div><div class="s">${fechaC(c.in)} 12 pm → ${fechaC(c.out)} 11 am · ${dinero(c.total)}</div><div class="s">${c.folio}${c.ejemplo?'':' · <b style="color:var(--pri)">nueva</b>'}</div><div class="acts">${botonesEstado(c)}</div></div></div>`}).join('')}</section>`}
+  // ocupación (14 días)
+  const ini=S.pIni,W=34,N=14;let head='';
+  for(let i=0;i<N;i++){const f=sumar(ini,i),d=deIso(f);head+=`<div class="${f===hoy?'hoy':''}">${DIAS[d.getDay()].slice(0,2)}<b>${d.getDate()}</b></div>`}
+  const fin=sumar(ini,N);
+  const filas=g.casas.map(c=>{const bs=activas.filter(r=>r.casa===c.id&&r.in<fin&&r.out>ini).map(r=>{
+    const a=Math.max(0,difDias(ini,r.in))*W+(r.in>=ini?W/2:0),b=Math.min(N,difDias(ini,r.out))*W+(r.out<=fin?W/2:W*0);
+    return `<div class="bk ${r.estado==='llego'?'llego':''}" style="left:${a}px;width:${Math.max(18,b-a-2)}px" title="${esc(r.nombre)}">${esc(r.nombre.split(' ')[0])}</div>`}).join('');
+    return `<div class="gn">${c.nombre}</div><div class="gr2" style="width:${W*N}px">${bs}</div>`}).join('');
+  const lleganHoy=activas.filter(r=>r.in===hoy),salenHoy=activas.filter(r=>r.out===hoy);
+  const noches=g.casas.length*N,ocup=g.casas.reduce((a,c)=>{let n=0;for(let i=0;i<N;i++)if(nocheOcupada(c.id,sumar(ini,i)))n++;return a+n},0);
+  return tabs+`<div class="stats"><div class="stat"><b>${lleganHoy.length}</b><small>llegan hoy</small></div><div class="stat"><b>${salenHoy.length}</b><small>salen hoy</small></div><div class="stat"><b>${Math.round(ocup/noches*100)}%</b><small>ocupación</small></div></div>
+  <div class="dnav"><button data-act="pini" data-v="-7" aria-label="Semana anterior">‹</button><b>${fechaC(ini)} – ${fechaC(sumar(ini,N-1))}</b><button data-act="pini" data-v="7" aria-label="Semana siguiente">›</button></div>
+  <section class="card"><div class="gantt"><div class="gh">${head}</div>${filas}</div>
+  <div class="leg"><span><i style="background:var(--pri)"></i>Reservado</span><span><i style="background:#1b7446"></i>Ya llegó</span></div></section>
+  <section class="card"><div class="stp">Hoy</div>${lleganHoy.length||salenHoy.length?'':'<p class="empty">Hoy no hay llegadas ni salidas.</p>'}
+  ${lleganHoy.map(r=>`<div class="kv"><span>Llega 12:00 pm · ${casa(r.casa).nombre}</span><b>${esc(r.nombre)}</b></div>`).join('')}
+  ${salenHoy.map(r=>`<div class="kv"><span>Sale 11:00 am · ${casa(r.casa).nombre}</span><b>${esc(r.nombre)}</b></div>`).join('')}</section>`}
+
+/* ---------- render ---------- */
+function render(){const g=G();tema();
+  let body='';
+  if(S.vista==='panel')body=vHdr()+(g.renta?vPanelRenta():vPanelHoras())+vMio();
+  else if(S.ticket)body=vHdr()+`<div style="height:14px"></div>`+vTicket()+vMio();
+  else if(g.renta)body=vHdr()+vHero()+vCasas()+vCalendario()+vDatosRenta()+vMio()+vFootRenta();
+  else body=vHdr()+vHero()+vServicios()+vQuien()+vDiaHora()+vDatos()+vMio()+vFootHoras();
+  $('#app').innerHTML=vDemobar()+`<div class="wrap">${body}</div>`+vHoja();
+}
+function toast(t){const e=document.createElement('div');e.className='toast';e.textContent=t;document.body.appendChild(e);setTimeout(()=>e.remove(),2600)}
+function ir(id){setTimeout(()=>{const e=document.getElementById(id);if(e)e.scrollIntoView({behavior:'smooth',block:'start'})},30)}
+
+/* ---------- acciones ---------- */
+function validar(){const g=G(),e={};
+  if(S.datos.nombre.trim().length<3)e.nombre='Escribe tu nombre.';
+  if(S.datos.tel.replace(/\D/g,'').length!==10)e.tel='Escribe 10 dígitos.';
+  for(const f of g.extra||[])if(f.req&&!(S.datos.extra[f.id]||'').trim())e[f.id]='Este dato es necesario.';
+  if(g.renta&&!S.datos.extra.huespedes)e.huespedes='Elige cuántos huéspedes.';
+  S.err=e;return !Object.keys(e).length}
+const A={
+  vista(){S.vista=S.vista==='cliente'?'panel':'cliente';scrollTo(0,0)},
+  hoja(){S.hoja=true},cerrar(){S.hoja=false;S.verIos=false},
+  giro(v){if(v!==S.k){S.k=v;reset();history.replaceState(null,'','?giro='+v);scrollTo(0,0)}S.hoja=false},
+  reiniciar(){for(const k of ORDEN){try{localStorage.removeItem('dg1-'+k)}catch(e){}cargar(k)}reset();S.hoja=false;S.vista='cliente';scrollTo(0,0);toast('Demo reiniciada: citas de ejemplo nuevas')},
+  instalar(){if(S.instalar){S.instalar.prompt();S.instalar=null}else S.verIos=true},
+  cat(v){S.cat=v},
+  toggle(v){v=+v;S.cart=S.cart.includes(v)?S.cart.filter(x=>x!==v):[...S.cart,v];S.hora=null;
+    if(S.quien&&!staffValido().some(p=>p.id===S.quien))S.quien=null},
+  quien(v){S.quien=v||null;S.hora=null},
+  fecha(v){S.fecha=v;S.hora=null},
+  hora(v){S.hora=+v;ir('st4')},
+  irHora(){if(!S.fecha&&!G().renta){const f=dias14().find(f=>G().horario[deIso(f).getDay()]&&horarios(S.k,f,S.cart,S.quien).some(h=>h.libre));if(f)S.fecha=f}ir(G().personal&&G().personal.length>1&&!G().renta?'st2':'st3')},
+  irDatos(){ir('st4')},
+  extra(v,el){S.datos.extra[el.dataset.f]=v;delete S.err[el.dataset.f]},
+  confirmar(){if(!validar())return;const g=G(),plan=armarPlan(S.k,S.fecha,S.hora,S.cart,S.quien);
+    if(!plan){toast('Ese horario se acaba de ocupar. Elige otro.');S.hora=null;return}
+    const c={folio:g.folio+'-'+DB[S.k].folio++,fecha:S.fecha,partes:plan,nombre:S.datos.nombre.trim(),tel:S.datos.tel.replace(/\D/g,''),extra:{...S.datos.extra},estado:'pendiente'};
+    DB[S.k].citas.push(c);guardar(S.k);S.ticket=c;scrollTo(0,0)},
+  casa(v){if(S.casa!==v){S.casa=v;S.in=S.out=null;S.datos.extra={};}ir('st3')},
+  mes(v){const d=deIso(S.mes||iso(hoy0()).slice(0,7)+'-01');d.setMonth(d.getMonth()+(+v));S.mes=iso(d)},
+  dia(f){if(!S.in||S.out){if(!nocheOcupada(S.casa,f)){S.in=f;S.out=null}return}
+    if(f<=S.in){if(!nocheOcupada(S.casa,f))S.in=f;return}
+    if(rangoLibre(S.casa,S.in,f)){S.out=f;ir('st4')}else if(!nocheOcupada(S.casa,f)){S.in=f}},
+  confirmarR(){if(!validar())return;const c=casa(S.casa);
+    if(!rangoLibre(S.casa,S.in,S.out)){toast('Esas noches se acaban de ocupar.');S.in=S.out=null;return}
+    const n=difDias(S.in,S.out),r={folio:'R-'+DB.renta.folio++,casa:S.casa,in:S.in,out:S.out,noches:n,total:n*c.precio,nombre:S.datos.nombre.trim(),tel:S.datos.tel.replace(/\D/g,''),extra:{mascota:'No',...S.datos.extra},estado:'pendiente'};
+    DB.renta.citas.push(r);guardar('renta');S.ticket=r;scrollTo(0,0)},
+  otra(){reset()},
+  ptab(v){S.pTab=v},
+  pdia(v){S.pFecha=sumar(S.pFecha,+v)},
+  pini(v){S.pIni=sumar(S.pIni,+v)},
+  irDia(v){S.pFecha=v;S.pTab='hoy'},
+  estado(v,el){const c=DB[S.k].citas.find(x=>x.folio===el.dataset.f);if(c){c.estado=c.estado===v&&v!=='cancelada'?'pendiente':v;guardar(S.k)}},
+  aviso(){toast('En la versión real aquí se editan precios, servicios y horarios.')},
+};
+document.addEventListener('click',e=>{const el=e.target.closest('[data-act]');if(!el)return;
+  const f=A[el.dataset.act];if(!f)return;if(el.tagName==='A')return void 0;
+  e.preventDefault();f(el.dataset.v,el);render()});
+document.addEventListener('input',e=>{const el=e.target.closest('[data-in]');if(!el)return;
+  if(el.dataset.in==='extra')S.datos.extra[el.dataset.f]=el.value;else S.datos[el.dataset.in]=el.value;});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&S.hoja){S.hoja=false;render()}});
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();S.instalar=e});
+S.ios=/iphone|ipad|ipod/i.test(navigator.userAgent)&&!navigator.standalone;
+
+/* ---------- arranque ---------- */
+(function(){for(const k of ORDEN)cargar(k);
+  const q=new URLSearchParams(location.search).get('giro'),guardado=LS.get('dg1-giro',null);
+  S.k=GIROS[q]?q:(GIROS[guardado]?guardado:'vet');
+  if(new URLSearchParams(location.search).get('vista')==='panel')S.vista='panel';
+  reset();render();
+  const _r=render;render=function(){_r();LS.set('dg1-giro',S.k)};
+  if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});
+})();
+
+</script>
+</body>
+</html>
